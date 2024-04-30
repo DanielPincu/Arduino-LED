@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Realtime Database Example</title>
+</head>
+<body>
+    <h1>LED Status: <span id="ledStatus">Loading...</span></h1>
+    <button id="toggleButton">Toggle LED</button>
+
+    <!-- Your JavaScript code -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js';
+        import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js';
+
+        // Your Firebase config
+        const firebaseConfig = {
+  apiKey: "AIzaSyB_BKamTWHc_wPGRCNRXEb7ZPzBKC8xeZ8",
+  authDomain: "arduino-bfed6.firebaseapp.com",
+  databaseURL: "https://arduino-bfed6-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "arduino-bfed6",
+  storageBucket: "arduino-bfed6.appspot.com",
+  messagingSenderId: "777414486309",
+  appId: "1:777414486309:web:a8ceb339293d735ea952cc"
+};
+
+        // Initialize Firebase
+        const firebaseApp = initializeApp(firebaseConfig);
+
+        // Get a reference to the database service
+        const database = getDatabase(firebaseApp);
+
+        // Reference to your LED node
+        const ledRef = ref(database, 'led');
+
+        // Listen for changes to the LED value
+        onValue(ledRef, (snapshot) => {
+            const ledStatus = snapshot.val();
+            // Update the HTML to reflect the LED status
+            document.getElementById('ledStatus').innerText = ledStatus ? 'On' : 'Off';
+        });
+
+        // Toggle LED function
+        function toggleLED() {
+            // Get the current LED status
+            onValue(ledRef, (snapshot) => {
+                const currentStatus = snapshot.val();
+                // Toggle the status and update in the database
+                set(ledRef, !currentStatus);
+            }, {
+                onlyOnce: true // Listen for the value only once
+            }).catch((error) => {
+                console.error("Error getting LED status: ", error);
+            });
+        }
+
+        // Add event listener to the toggle button
+        document.getElementById('toggleButton').addEventListener('click', toggleLED);
+    </script>
+</body>
+</html>
